@@ -1,16 +1,15 @@
 const graphql = require('graphql');
-
-const _ = require('lodash');
-
 const App = require('../models/app');
 const Stage = require('../models/stage');
-const Event = require('../models/event')
+const Event = require('../models/event');
 
 const { GraphQLObjectType,
     GraphQLString,
     GraphQLSchema,
     GraphQLID,
     GraphQLList,
+    GraphQLNonNull,
+    GraphQLInt,
 } = graphql;
 
 // var apps = [
@@ -85,25 +84,25 @@ const AppType = new GraphQLObjectType({
         stage: {
             type: StageType,
             resolve(parent, args) {
-                // return _.find(stages, { id: parent.stageId })
+                return Stage.findById(parent.stageId)
             }
         },
         stages: {
             type: new GraphQLList(StageType),
             resolve(parent, args) {
-                // return _.filter(stages, { appId: parent.id })
+                return Stage.find({ appId: parent.id })
             }
         },
         event: {
             type: EventType,
             resolve(parent, args) {
-                // return _.find(events, { id: parent.eventId })
+                return Event.findById(parent.eventId)
             }
         },
         events: {
             type: new GraphQLList(EventType),
             resolve(parent, args) {
-                // return _.filter(events, { appId: parent.id })
+                return Event.find({ appId: parent.id })
             }
         }
     })
@@ -117,25 +116,25 @@ const StageType = new GraphQLObjectType({
         app: {
             type: AppType,
             resolve(parent, args) {
-                // return _.find(apps, { id: parent.appId })
+                return App.findById(parent.appId)
             }
         },
         apps: {
             type: new GraphQLList(AppType),
             resolve(parent, args) {
-                // return _.filter(apps, { stageId: parent.id })
+                return App.find({ stageId: parent.id })
             }
         },
         event: {
             type: EventType,
             resolve(parent, args) {
-                // return _.find(events, { id: parent.eventId })
+                return Event.findById(parent.eventId)
             }
         },
         events: {
             type: new GraphQLList(EventType),
             resolve(parent, args) {
-                // return _.filter(events, { stageId: parent.id })
+                return Event.find({ stageId: parent.id })
             }
         }
     })
@@ -149,31 +148,31 @@ const EventType = new GraphQLObjectType({
         stageId: { type: GraphQLID },
         description: { type: GraphQLString },
         image: { type: GraphQLString },
-        startsAt: { type: GraphQLString },
-        endsAt: { type: GraphQLString },
+        startsAt: { type: GraphQLInt },
+        endsAt: { type: GraphQLInt },
         name: { type: GraphQLString },
         app: {
             type: AppType,
             resolve(parent, args) {
-                // return _.find(apps, { id: parent.appId })
+                return App.findById(parent.appId)
             }
         },
         apps: {
             type: new GraphQLList(AppType),
             resolve(parent, args) {
-                // return _.filter(apps, { stageId: parent.id })
+                return App.find({ eventId: parent.id })
             }
         },
         stage: {
             type: StageType,
             resolve(parent, args) {
-                // return _.find(stages, { id: parent.stageId })
+                return Stage.findById(parent.stageId)
             }
         },
         stages: {
             type: new GraphQLList(StageType),
             resolve(parent, args) {
-                // return _.filter(stages, { appId: parent.id })
+                return Stage.find({ eventId: parent.id })
             }
         }
     })
@@ -186,39 +185,53 @@ const RootQuery = new GraphQLObjectType({
             type: AppType,
             args: { id: { type: GraphQLID } },
             resolve(parent, args) {
-                // return _.find(apps, { id: args.id });
+                return App.findById(args.id)
             }
         },
         stage: {
             type: StageType,
             args: { id: { type: GraphQLID } },
             resolve(parent, args) {
-                // return _.find(stages, { id: args.id });
+                return Stage.findById(args.id)
+            }
+        },
+        stageByName: {
+            type: StageType,
+            args: { name: { type: GraphQLString } },
+            resolve(parent, args) {
+                return Stage.findOne({ name: args.name })
             }
         },
         event: {
             type: EventType,
             args: { id: { type: GraphQLID } },
             resolve(parent, args) {
-                // return _.find(events, { id: args.id });
+                return Event.findById(args.id)
+            }
+        },
+        eventByName: {
+            type: EventType,
+            args: { name: { type: GraphQLString } },
+            resolve(parent, args) {
+                return Event.findOne({ name: args.name })
             }
         },
         apps: {
             type: new GraphQLList(AppType),
             resolve(parent, args) {
-                // return apps
+                return App.find({})
             }
         },
         stages: {
             type: new GraphQLList(StageType),
             resolve(parent, args) {
-                // return stages
+                return Stage.find({})
             }
         },
         events: {
             type: new GraphQLList(EventType),
             resolve(parent, args) {
-                // return events
+                return Event.find({})
             }
         }
     }
@@ -230,20 +243,140 @@ const Mutation = new GraphQLObjectType({
         addApp: {
             type: AppType,
             args: {
-                name: { type: GraphQLString }
+                name: { type: new GraphQLNonNull(GraphQLString) },
+                stageId: { type: GraphQLID },
+                eventId: { type: GraphQLID },
 
             },
             resolve(parent, args) {
                 let app = new App({
-                    name: args.name
+                    name: args.name,
+                    stageId: args.stageId,
+                    eventId: args.eventId
                 });
                 return app.save();
             }
-        }
+        },
+        addStage: {
+            type: StageType,
+            args: {
+                name: { type: new GraphQLNonNull(GraphQLString) },
+                appId: { type: GraphQLID },
+                eventId: { type: GraphQLID },
+            },
+            resolve(parent, args) {
+                let stage = new Stage({
+                    name: args.name
+                });
+                return stage.save();
+            }
+        },
+        addEvent: {
+            type: EventType,
+            args: {
+                name: { type: new GraphQLNonNull(GraphQLString) },
+                stageId: { type: new GraphQLNonNull(GraphQLString) },
+                appId: { type: new GraphQLNonNull(GraphQLString) },
+                description: { type: new GraphQLNonNull(GraphQLString) },
+                image: { type: new GraphQLNonNull(GraphQLString) },
+                startsAt: { type: new GraphQLNonNull(GraphQLInt) },
+                endsAt: { type: new GraphQLNonNull(GraphQLInt) }
+            },
+            resolve(parent, args) {
+                let event = new Event({
+                    name: args.name,
+                    stageId: args.stageId,
+                    appId: args.appId,
+                    description: args.description,
+                    image: args.image,
+                    startsAt: args.startsAt,
+                    endsAt: args.endsAt
+                });
+                return event.save();
+            }
+        },
+        deleteApp: {
+            type: AppType,
+            args: {
+                id: { type: new GraphQLNonNull(GraphQLID) }
+            },
+            resolve(parent, args) {
+                return App.findByIdAndDelete(args.id);
+            }
+        },
+        deleteStage: {
+            type: StageType,
+            args: {
+                id: { type: new GraphQLNonNull(GraphQLID) }
+            },
+            resolve(parent, args) {
+                return Stage.findByIdAndDelete(args.id);
+            }
+        },
+        deleteEvent: {
+            type: EventType,
+            args: {
+                id: { type: new GraphQLNonNull(GraphQLID) }
+            },
+            resolve(parent, args) {
+                return Event.findByIdAndDelete(args.id);
+            }
+        },
+        updateApp: {
+            type: AppType,
+            args: {
+                id: { type: new GraphQLNonNull(GraphQLID) },
+                name: { type: new GraphQLNonNull(GraphQLString) },
+                stageId: { type: GraphQLID },
+                eventId: { type: GraphQLID },
+            },
+            resolve(parent, args) {
+
+                return App.findByIdAndUpdate(args.id, args);
+            }
+        },
+        updateStage: {
+            type: StageType,
+            args: {
+                id: { type: new GraphQLNonNull(GraphQLID) },
+                name: { type: new GraphQLNonNull(GraphQLString) },
+                appId: { type: GraphQLID },
+                eventId: { type: GraphQLID },
+            },
+            resolve(parent, args) {
+
+                return Stage.findByIdAndUpdate(args.id, args);
+            }
+        },
+        updateEvent: {
+            type: EventType,
+            args: {
+                id: { type: new GraphQLNonNull(GraphQLID) },
+                name: { type: new GraphQLNonNull(GraphQLString) },
+                appId: { type: GraphQLNonNull(GraphQLID) },
+                stageId: { type: GraphQLNonNull(GraphQLID) },
+                description: { type: new GraphQLNonNull(GraphQLString) },
+                image: { type: graphql.GraphQLString },
+                startsAt: { type: new GraphQLNonNull(graphql.GraphQLInt) },
+                endsAt: { type: new GraphQLNonNull(graphql.GraphQLInt) }
+            },
+            resolve(parent, args) {
+
+                return Event.findByIdAndUpdate(args.id, args);
+            }
+        },
     }
 });
+
 
 module.exports = new GraphQLSchema({
     query: RootQuery,
     mutation: Mutation,
 });
+
+
+
+
+// var date = new Date(1577916000 * 1000)
+// date.toUTCString()
+// 'Wed, 01 Jan 2020 22:00:00 GMT'

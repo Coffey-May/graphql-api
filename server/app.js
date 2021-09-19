@@ -1,21 +1,25 @@
 const express = require('express');
-
 const { graphqlHTTP } = require('express-graphql');
-
 const schema = require('./schema/schema');
-
 const mongoose = require('mongoose');
-
-require('dotenv').config()
+const cors = require('cors');
+const app = express();
+app.use(cors());
+require('dotenv').config();
 
 const DB_CONNECTION = process.env.DB_CONNECTION
-mongoose.connect(DB_CONNECTION);
+mongoose.connect(DB_CONNECTION, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+}).then(() => {
+    console.log('connected to database');
+});
 
 mongoose.connection.once('open', () => {
     console.log('mongoose connected to database');
 });
 
-const app = express();
+
 
 app.use('/graphql', graphqlHTTP({
     schema,
