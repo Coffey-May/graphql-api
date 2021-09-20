@@ -2,9 +2,9 @@ const graphql = require('graphql');
 const App = require('../models/app');
 const Stage = require('../models/stage');
 const Event = require('../models/event');
-const GraphQLDate = require("graphql-iso-date");
-const { events } = require('../models/app');
-const e = require('express');
+const { result } = require('lodash');
+// const { events } = require('../models/app');
+// const e = require('express');
 
 const { GraphQLObjectType,
     GraphQLString,
@@ -175,18 +175,39 @@ const RootQuery = new GraphQLObjectType({
         },
         eventsBetweenDates: {
             type: new GraphQLList(EventType),
-
             args: {
                 startTime: { type: GraphQLNonNull(GraphQLString) },
                 endTime: { type: GraphQLNonNull(GraphQLString) },
             },
             resolve(parent, args) {
-                // console.log(
-                //     args.startTime = Date.parse(args.startTime),
-                //     args.endTime = Date.parse(args.endTime)
-                // )
+                args.startTime = Date.parse(args.startTime)
+                args.endTime = Date.parse(args.endTime)
+                let filteredEvents
+                let nameList = []
 
-                return Event.find({})
+                Event.find({}).then(events => {
+
+                    events.forEach(el => {
+
+                        el.startsAt = Date.parse(el.startsAt)
+                        el.endsAt = Date.parse(el.endsAt)
+                        if (el.startsAt > args.startTime && el.endsAt < args.endTime) {
+                            // filteredEvents = events.filter(ev => ev.name === el.name)
+                            filteredEvents = events.forEach(ev => {
+                                if (ev.name == el.name) {
+                                    nameList.push(ev.name)
+                                }
+                            })
+                        }
+                    })
+                    nList = nameList
+                    return nList
+                })
+
+                const eventList = nList.filter(item => {
+                    return Event.find({ name: item })
+                });
+                return Event.find({ name: eventList })
             }
         },
     }
