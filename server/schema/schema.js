@@ -2,6 +2,9 @@ const graphql = require('graphql');
 const App = require('../models/app');
 const Stage = require('../models/stage');
 const Event = require('../models/event');
+const GraphQLDate = require("graphql-iso-date");
+const { events } = require('../models/app');
+const e = require('express');
 
 const { GraphQLObjectType,
     GraphQLString,
@@ -11,70 +14,6 @@ const { GraphQLObjectType,
     GraphQLNonNull,
     GraphQLInt,
 } = graphql;
-
-// var apps = [
-//     { id: "1", stageId: "1", eventId: "1", name: "HipHopFest 2020" },
-//     { id: "2", stageId: "2", eventId: "2", name: "jazz 2030" },
-//     { id: "3", stageId: "3", eventId: "3", name: "classical 2021" }
-// ]
-// var stages = [
-//     { id: "1", eventId: "1", appId: "1", name: "Rizzle" },
-//     { id: "2", eventId: "2", appId: "2", name: "Tizzle" },
-//     { id: "3", eventId: "3", appId: "3", name: "FoShizzle" }
-// ]
-
-// const events = [
-//     {
-//         id: "1",
-//         appId: "1",
-//         stageId: "1",
-//         name: "Kanye West",
-//         description: "Kanye Omari West is an American rapper, singer, songwriter, record producer, fashion designer, and entrepreneur.",
-//         image: "http://assets.aloompa.com.s3.amazonaws.com/rappers/KanyeWest.jpeg",
-//         startsAt: 1577916000,
-//         endsAt: 1577919600
-//     },
-//     {
-//         id: "2",
-//         appId: "1",
-//         stageId: "2",
-//         name: "Drake",
-//         description: "Aubrey Drake Graham is a Canadian rapper, singer, songwriter, record producer, actor, and entrepreneur. Drake initially gained recognition as an actor on the teen drama television series Degrassi: The Next Generation in the early 2000s.",
-//         "image": "http://assets.aloompa.com.s3.amazonaws.com/rappers/Drake.jpeg",
-//         startsAt: 1577919600,
-//         endsAt: 1577923200
-//     },
-//     {
-//         id: "3",
-//         appId: "1",
-//         stageId: "3",
-//         name: "Kendrick Lamar",
-//         description: "Kendrick Lamar Duckworth is an American rapper and songwriter. Raised in Compton, California, Lamar embarked on his musical career as a teenager under the stage name K-Dot, releasing a mixtape that garnered local attention and led to his signing with indie record label Top Dawg Entertainment (TDE)",
-//         image: "http://assets.aloompa.com.s3.amazonaws.com/rappers/Kendrick.jpeg",
-//         startsAt: 1577916000,
-//         endsAt: 1577919600
-//     },
-//     {
-//         id: "4",
-//         appId: "1",
-//         stageId: "1",
-//         name: "Future",
-//         description: "Nayvadius DeMun Wilburn, known professionally as Future, is an American rapper, singer, songwriter, and record producer.",
-//         image: "http://assets.aloompa.com.s3.amazonaws.com/rappers/Future.jpeg",
-//         startsAt: 1577919600,
-//         endsAt: 1577923200
-//     },
-//     {
-//         id: "5",
-//         appId: "1",
-//         stageId: "2",
-//         name: "J. Cole",
-//         description: "Jermaine Lamarr Cole, better known by his stage name J. Cole, is an American hip hop recording artist and record producer.",
-//         image: "http://assets.aloompa.com.s3.amazonaws.com/rappers/JCole.jpeg",
-//         startsAt: 1577923200,
-//         endsAt: 1577930400
-//     }
-// ]
 
 const AppType = new GraphQLObjectType({
     name: 'App',
@@ -148,8 +87,8 @@ const EventType = new GraphQLObjectType({
         stageId: { type: GraphQLID },
         description: { type: GraphQLString },
         image: { type: GraphQLString },
-        startsAt: { type: GraphQLInt },
-        endsAt: { type: GraphQLInt },
+        startsAt: { type: GraphQLString },
+        endsAt: { type: GraphQLString },
         name: { type: GraphQLString },
         app: {
             type: AppType,
@@ -233,7 +172,23 @@ const RootQuery = new GraphQLObjectType({
             resolve(parent, args) {
                 return Event.find({})
             }
-        }
+        },
+        eventsBetweenDates: {
+            type: new GraphQLList(EventType),
+
+            args: {
+                startTime: { type: GraphQLNonNull(GraphQLString) },
+                endTime: { type: GraphQLNonNull(GraphQLString) },
+            },
+            resolve(parent, args) {
+                // console.log(
+                //     args.startTime = Date.parse(args.startTime),
+                //     args.endTime = Date.parse(args.endTime)
+                // )
+
+                return Event.find({})
+            }
+        },
     }
 });
 
@@ -289,8 +244,8 @@ const Mutation = new GraphQLObjectType({
                     appId: args.appId,
                     description: args.description,
                     image: args.image,
-                    startsAt: args.startsAt,
-                    endsAt: args.endsAt
+                    startsAt: new Date(args.startsAt * 1000).toISOString().substring(0, 10),
+                    endsAt: new Date(args.endsAt * 1000).toISOString().substring(0, 10),
                 });
                 return event.save();
             }
@@ -356,11 +311,13 @@ const Mutation = new GraphQLObjectType({
                 appId: { type: GraphQLNonNull(GraphQLID) },
                 stageId: { type: GraphQLNonNull(GraphQLID) },
                 description: { type: new GraphQLNonNull(GraphQLString) },
-                image: { type: graphql.GraphQLString },
-                startsAt: { type: new GraphQLNonNull(graphql.GraphQLInt) },
-                endsAt: { type: new GraphQLNonNull(graphql.GraphQLInt) }
+                image: { type: new GraphQLNonNull(GraphQLString) },
+                startsAt: { type: new GraphQLNonNull(GraphQLInt) },
+                endsAt: { type: new GraphQLNonNull(GraphQLInt) },
             },
             resolve(parent, args) {
+                args.startsAt = new Date(args.startsAt * 1000).toISOString().substring(0, 10),
+                    args.endsAt = new Date(args.endsAt * 1000).toISOString().substring(0, 10)
 
                 return Event.findByIdAndUpdate(args.id, args);
             }
@@ -374,9 +331,3 @@ module.exports = new GraphQLSchema({
     mutation: Mutation,
 });
 
-
-
-
-// var date = new Date(1577916000 * 1000)
-// date.toUTCString()
-// 'Wed, 01 Jan 2020 22:00:00 GMT'

@@ -8,8 +8,8 @@ const eventSchema = new Schema({
     appId: String,
     description: String,
     image: String,
-    startsAt: Number,
-    endsAt: Number
+    startsAt: String,
+    endsAt: String
 });
 
 module.exports = mongoose.model('Event', eventSchema);
