@@ -1,0 +1,177 @@
+● You should be able to list all of the apps  
+
+{
+  apps{
+    name
+    id
+  }
+}
+
+● You should be able to query a single app
+
+{
+  appById(id:"[Your unique id goes here]"){
+    name
+    id
+  }
+}
+
+● You should be able to list all the stages
+
+{
+  stages{
+    name 
+    id
+  }
+}
+
+● You should be able to query a single stage
+
+{
+  stageById(id:"[Your unique id goes here]"){
+    name 
+    id
+  }
+}
+
+● You should be able to search the stages by name
+
+{
+  stageByName(name:"[Unique Stage name goes here]"){
+    name 
+    id
+  }
+}
+
+● You should be able to list all of the events
+
+{
+  events{
+    name
+    id 
+    stageId
+    appId
+    description
+    image
+    startsAt
+    endsAt
+  }
+}
+
+● You should be able to query a single event
+
+{
+  eventById(id:"[Your unique id goes here]"){
+    name
+    id 
+    stageId
+    appId
+    description
+    image
+    startsAt
+    endsAt
+  }
+}
+
+● You should be able to search the events by name
+
+{
+  eventByName(id:"[Your unique name goes here]"){
+    name
+    id 
+    stageId
+    appId
+    description
+    image
+    startsAt
+    endsAt
+  }
+}
+● You should be able to query the events that occur between two dates
+
+{
+  eventsBetweenDates(startTime:"[Unique ISO date max 0f 10 characters]",endTime:"[Unique ISO date max 0f 10 characters]"){
+    name
+    id 
+    stageId
+    appId
+    description
+    image
+    startsAt
+    endsAt
+  }
+}
+● You should be able to list all of the events in an app
+
+{
+  events{
+    id
+    name
+    stageId
+    appId
+    description
+    image
+    startsAt
+    endsAt
+  }
+}
+
+● You should be able to list all the stages in an app
+
+{
+  appById(id:"[Your unique id goes here]"){
+    name
+    id
+    stages{
+      id
+      name
+    }
+  }
+}
+● You should be able to get the stage in an event
+
+{
+  eventById(id:"[Your unique id goes here]"){
+    id
+    name
+    stage{
+      name
+    }
+  }
+}
+
+● You should be able to list the events at a stage
+
+{
+  stageById(id:"[Your unique id goes here]"){
+    name
+    id
+    events{
+      id
+      name
+    }
+  }
+}
+● You should be able to add, update and remove all entities
+
+Pattern follows for all entities
+
+mutation{
+  addApp(name:"[name provided for creation of new app]"){
+    name
+  }
+}
+
+mutation{
+  updateApp(id:"[id of entity to be updated goes here]", name:"[name provided for creation of new app]"){
+      id
+      name
+  }
+}
+
+mutation{
+  deleteApp(id:"[id of entity to be deleted goes here]"){
+      id
+      name
+  }
+}

@@ -2,9 +2,6 @@ const graphql = require('graphql');
 const App = require('../models/app');
 const Stage = require('../models/stage');
 const Event = require('../models/event');
-const { result } = require('lodash');
-// const { events } = require('../models/app');
-// const e = require('express');
 
 const { GraphQLObjectType,
     GraphQLString,
@@ -120,14 +117,14 @@ const EventType = new GraphQLObjectType({
 const RootQuery = new GraphQLObjectType({
     name: 'RootQueryType',
     fields: {
-        app: {
+        appById: {
             type: AppType,
             args: { id: { type: GraphQLID } },
             resolve(parent, args) {
                 return App.findById(args.id)
             }
         },
-        stage: {
+        stageById: {
             type: StageType,
             args: { id: { type: GraphQLID } },
             resolve(parent, args) {
@@ -141,7 +138,7 @@ const RootQuery = new GraphQLObjectType({
                 return Stage.findOne({ name: args.name })
             }
         },
-        event: {
+        eventById: {
             type: EventType,
             args: { id: { type: GraphQLID } },
             resolve(parent, args) {
@@ -180,19 +177,19 @@ const RootQuery = new GraphQLObjectType({
                 endTime: { type: GraphQLNonNull(GraphQLString) },
             },
             resolve(parent, args) {
-                args.startTime = Date.parse(args.startTime)
-                args.endTime = Date.parse(args.endTime)
-                let filteredEvents
-                let nameList = []
 
-                Event.find({}).then(events => {
+                Event.find({}).then((events) => {
+
+                    args.startTime = Date.parse(args.startTime)
+                    args.endTime = Date.parse(args.endTime)
+                    let filteredEvents
+                    let nameList = []
 
                     events.forEach(el => {
 
                         el.startsAt = Date.parse(el.startsAt)
                         el.endsAt = Date.parse(el.endsAt)
                         if (el.startsAt > args.startTime && el.endsAt < args.endTime) {
-                            // filteredEvents = events.filter(ev => ev.name === el.name)
                             filteredEvents = events.forEach(ev => {
                                 if (ev.name == el.name) {
                                     nameList.push(ev.name)
@@ -201,12 +198,13 @@ const RootQuery = new GraphQLObjectType({
                         }
                     })
                     nList = nameList
-                    return nList
+                    // return nList
                 })
 
                 const eventList = nList.filter(item => {
                     return Event.find({ name: item })
                 });
+
                 return Event.find({ name: eventList })
             }
         },

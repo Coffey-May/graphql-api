@@ -1,6 +1,6 @@
-# GraphQL API
+# **GraphQL API**
 
-## Description
+# Description
 
 An API for accessing music events, times, stage locations, and artist details.
 
@@ -8,34 +8,68 @@ An API for accessing music events, times, stage locations, and artist details.
 
 ## Features
 
-Available endpoints allow the user affordances for listing applications, stages, events, and their details; as well as a filter for finding events between given dates
+> Available endpoints allow the user affordances for listing applications, stages, events, and their details; as well as a filter for finding events between given dates
 
 ---
 
-## Install
+# Install
 
     $ git clone https://github.com/Coffey-May/graphql-api
     $ cd graphQL-API
-    $ yarn install or npm install
+    $ yarn install
+     or npm install
 
 ---
 
 ## Dependencies
 
+    npm install express nodemon graphql graphql-express mongoose
+
 ---
 
 ## Use and Endpoints
 
-#### 1.
+### Query all apps
 
-List all of the apps. Query in the graphiql client for retrieving a list of all apps is as follows.
+- The below example will query for a list of all apps:
 
+```
     {
         apps{
             name
             id
         }
     }
+```
+
+- The resultant data will read:
+
+```
+    {
+    "data": {
+        "apps": [
+        {
+            "name": "HipHopFest 2020",
+            "id": "6146511b48929a60151fbdfb"
+        },
+        {
+            "name": "Classical Music Showcase",
+            "id": "61466fc9bf635833f413eb45"
+        }
+        ]
+    }
+    }
+```
+
+### Query Cheat-sheet
+
+> Within the folder structure of the project one can find a `testQueries.txt` file, which acts as a cheat sheet to copy and paste testable queries that meet the needs of the application within in the graphiql client.
+
+#### Caveats
+
+> Time format will be input as type: ISO, max-length 10 charachters; when utilizing the `eventsBetweenDates` query. However, when creating a new event `addEvent` or updating an event `updateEvent`, time formaat will be input as type Int.
+
+---
 
 ## Requirements
 
@@ -80,24 +114,13 @@ After installing node, this project will need yarn too, so just run the followin
 
 ---
 
-## Install
-
-    $ git clone https://github.com/Coffey-May/graphql-api
-    $ cd graphQL-API
-    $ yarn install
-
 ## Configure app
 
-Open `a/nice/path/to/a.file` then edit it with your settings. You will need:
+Create a .env file and apply your own environment variables
 
-- A setting;
-- Another setting;
-- One more setting;
+- A URL_CONNECTION variable, or your PORT of choice.
+- A DB_CONNECTION variable for accessing 3rd party database ,i.e., MongoDb.
 
 ## Running the project
 
-    $ yarn start
-
-## Simple build for production
-
-    $ yarn build
+    $ npx nodemon app.js

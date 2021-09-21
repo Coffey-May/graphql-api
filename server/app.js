@@ -8,6 +8,8 @@ app.use(cors());
 require('dotenv').config();
 
 const DB_CONNECTION = process.env.DB_CONNECTION
+const PORT = process.env.URL_CONNECTION || 4000
+
 mongoose.connect(DB_CONNECTION, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -26,7 +28,7 @@ app.use('/graphql', graphqlHTTP({
     graphiql: true
 }));
 
-app.listen(4000, () => {
-    console.log('now listening on port 4000.');
+app.listen(`${PORT}`, () => {
+    console.log(`now listening on port ${PORT}.`);
 });
 
