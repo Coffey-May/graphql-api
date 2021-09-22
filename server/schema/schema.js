@@ -179,10 +179,8 @@ const RootQuery = new GraphQLObjectType({
             resolve(parent, args) {
 
                 Event.find({}).then((events) => {
-
                     args.startTime = Date.parse(args.startTime)
                     args.endTime = Date.parse(args.endTime)
-                    let filteredEvents
                     let nameList = []
 
                     events.forEach(el => {
@@ -190,22 +188,18 @@ const RootQuery = new GraphQLObjectType({
                         el.startsAt = Date.parse(el.startsAt)
                         el.endsAt = Date.parse(el.endsAt)
                         if (el.startsAt > args.startTime && el.endsAt < args.endTime) {
-                            filteredEvents = events.forEach(ev => {
+                            events.forEach(ev => {
                                 if (ev.name == el.name) {
                                     nameList.push(ev.name)
                                 }
                             })
                         }
                     })
+                    console.log("1", nameList)
                     nList = nameList
-                    // return nList
                 })
-
-                const eventList = nList.filter(item => {
-                    return Event.find({ name: item })
-                });
-
-                return Event.find({ name: eventList })
+                console.log(nList.length)
+                return Event.find({ name: nList })
             }
         },
     }
