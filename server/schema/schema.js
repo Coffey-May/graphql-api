@@ -176,9 +176,9 @@ const RootQuery = new GraphQLObjectType({
                 startTime: { type: GraphQLNonNull(GraphQLString) },
                 endTime: { type: GraphQLNonNull(GraphQLString) },
             },
-            resolve(parent, args) {
+            resolve: async (parent, args) => {
 
-                Event.find({}).then((events) => {
+                await Event.find({}).then((events) => {
                     args.startTime = Date.parse(args.startTime)
                     args.endTime = Date.parse(args.endTime)
                     let nameList = []
@@ -198,6 +198,7 @@ const RootQuery = new GraphQLObjectType({
                     console.log("1", nameList)
                     nList = nameList
                 })
+
                 console.log(nList.length)
                 return Event.find({ name: nList })
             }
@@ -343,4 +344,6 @@ module.exports = new GraphQLSchema({
     query: RootQuery,
     mutation: Mutation,
 });
+
+
 
